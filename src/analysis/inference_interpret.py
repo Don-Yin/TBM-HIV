@@ -17,6 +17,28 @@ from collections import defaultdict
 from scipy.stats import wilcoxon
 from itertools import product
 
+
+# -------- before anything else, make the confusion matrices and calculate model accuracy --------
+def plot_confusion_matrices():
+    path_to_interences = Path("results", "inference")
+    run_names = os.listdir(path_to_interences)
+    run_names = [name for name in run_names if os.path.isdir(path_to_interences / name)]
+
+    for name in run_names:
+        path_json = Path("results", "inference", name, f"{name}.json")
+        json_data = json.load(open(path_json))
+        plot_and_compute_metrics(
+            path_json,
+            json_data,
+            save_to=Path("results", "confusion_matrices", name, f"{name}.png"),
+            text_save_to=Path("results", "confusion_matrices", name, f"{name}.json"),
+            accuracy_type="unbalanced",  # "balanced" or "unbalanced"
+        )
+
+
+plot_confusion_matrices()
+
+# -------- now rest of the code depends on the stats by above--------
 run_names = Path("results", "inference")
 run_names = os.listdir(run_names)
 
@@ -61,12 +83,15 @@ def get_best_run(run_names, metric="Accuracy"):
 
 def plot_metrices_violin(run_names, metric="Accuracy", label="Lesion Type", baseline=0.16666):
     """Plot data source, imaging, clinical, and both using a violin plot"""
-    # Getting metrics and data sources
+    # -------- getting metrics and data sources --------
     values = [get_metric_from_run(run, metric) for run in run_names]
     data_sources = [get_data_source_from_run(run) for run in run_names]
 
-    # Constructing a DataFrame for plotting
+    # -------- make a DataFrame for plotting --------
     df = pandas.DataFrame({"Values": values, "DataSource": data_sources})
+
+    # -------- defining the order for the x-axis --------
+    df["DataSource"] = pandas.Categorical(df["DataSource"], categories=["BOTH", "ONLY_IMAGE", "ONLY_CLINICAL"], ordered=True)
 
     plt.figure(figsize=(10, 6))
     sns.violinplot(data=df, x="DataSource", y="Values", inner="quartile", palette="pastel")
@@ -94,7 +119,6 @@ def plot_metrices_violin(run_names, metric="Accuracy", label="Lesion Type", base
     plt.tight_layout()
     plt.grid(True, which="both", linestyle="--", linewidth=0.5)
     plt.savefig(Path("results", "images", "accuracy", f"{metric.lower()}_{label.lower()}.png"), dpi=420)
-
 
 
 class CompareTopNPerformanceAcrossGroups:
@@ -203,7 +227,7 @@ class CompareTopNPerformanceAcrossGroups:
             f"Distribution of {self.metric.capitalize()} by {self.label_type.capitalize()} in the Top {self.top_n} Models Ranked by Accuracy",
             fontsize=12,
         )
-        plt.xlabel('')  # Removes the x-axis label
+        plt.xlabel("")  # Removes the x-axis label
         # plt.ylabel(self.metric.capitalize(), fontsize=16)
         plt.legend(title="HIV Status")
         plt.xticks(rotation=45, ha="right", fontsize=12)  # Rotate x-axis labels for better visibility

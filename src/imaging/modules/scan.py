@@ -5,8 +5,6 @@ from pathlib import Path
 from natsort import natsorted
 
 
-
-
 class Scan:
     def __init__(self, name):
         path_label = Path("data", "MRI_sessions.csv")

@@ -169,6 +169,8 @@ def final_select_features():
 
     # select the top 48 most important features
     selected_features = importances_df["Feature"].values[:56]
+    selected_features_importance = importances_df["Importance"].values[:56]
+    selected_features_importance = [round(i, 4) for i in selected_features_importance]
 
     # Calculate the mean R2 scores with the selected features across imputed datasets
     r2_scores = []
@@ -217,7 +219,7 @@ def final_select_features():
         writer.write(save_content)
 
     # print(f"R2 in the retrained model: {mean_r2_score}")
-    return selected_features
+    return selected_features, selected_features_importance
 
 
 def parse_onehot_encoded_features(selected_featuers):
@@ -237,7 +239,7 @@ def parse_onehot_encoded_features(selected_featuers):
 
 
 # print("------------------------------------------------------------------------")
-selected_features = final_select_features()
+selected_features, selected_features_importance = final_select_features()
 selected_features = parse_onehot_encoded_features(selected_features)
 variables.plot_table(selected_features)
 # print("------------------------------------------------------------------------")
@@ -248,7 +250,8 @@ variables.plot_table(selected_features)
 
 if __name__ == "__main__":
     # print("------------------------------------------------------------------------")
-    print(selected_features)
+    corresponding_feature_importance = {f: i for f, i in zip(selected_features, selected_features_importance)}
+    print(corresponding_feature_importance)
     # draw_elbow_curve_main()
     # selected_features = final_select_features()
     print("------------------------------------------------------------------------")

@@ -4,6 +4,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, accuracy_score, recall_score, f1_score
+from sklearn.metrics import balanced_accuracy_score
 
 
 def get_label_type(path):
@@ -17,11 +18,15 @@ def get_label_type(path):
     return config["meta_use_label"]
 
 
+from sklearn.metrics import balanced_accuracy_score
+
+
 def plot_and_compute_metrics(
     path_json,
     json_data,
     save_to=Path("test.png"),
     text_save_to=Path("test.json"),
+    accuracy_type="balanced",  # "balanced" or "unbalanced"
 ):
     true_labels = [entry["label"] for entry in json_data]
     predictions = [entry["prediction"] for entry in json_data]
@@ -34,7 +39,11 @@ def plot_and_compute_metrics(
         predictions = [i + 1 for i in predictions]
 
     classes = sorted(list(set(true_labels)))
-    acc = accuracy_score(true_labels, predictions)
+    if accuracy_type == "balanced":
+        acc = balanced_accuracy_score(true_labels, predictions)
+    else:
+        acc = accuracy_score(true_labels, predictions)
+
     sensitivity = recall_score(true_labels, predictions, average=None, labels=classes)
     f1 = f1_score(true_labels, predictions, average=None, labels=classes)
 
@@ -45,7 +54,7 @@ def plot_and_compute_metrics(
         print(f"Class {c}: Sensitivity (Recall): {sensitivity[idx]}, F1-score: {f1[idx]}")
         text_result.update({f"Class {c}": {"Sensitivity": sensitivity[idx], "F1-score": f1[idx]}})
 
-    # Step 4: Plot confusion matrix
+    # -------- Plot confusion matrix --------
     sns.set_context("talk")
     cm = confusion_matrix(true_labels, predictions, labels=classes)
     plt.figure(figsize=(10, 7))
