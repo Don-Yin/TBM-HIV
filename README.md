@@ -11,6 +11,7 @@
 # Note
 This codebase is part of an individual research project titled *Phenotyping Brain Changes in HIV and non-HIV Patients with Tuberculosis Meningitis.* 
 The PDF report is available at [here](report.pdf)
+![Cover](cover.png)
 The starting process is detailed in the setup section above. Please be aware that the project will not run as expected, as the data is not publicly available. The data for this research is derived from two prospective longitudinal studies conducted at Oxford University Clinical Research Unit (OUCRU). For more information, see the following two studies:
 - [Study 1](https://doi.org/10.12688/wellcomeopenres.14007.1)
 - [Study 2](https://doi.org/10.12688/wellcomeopenres.14006.2)
